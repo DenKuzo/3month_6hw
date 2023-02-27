@@ -3,7 +3,6 @@ from config import bot
 from .extra import users
 
 
-
 async def ban(message: types.Message):
     if message.chat.type != 'private':
         message_words = message.text.split()

@@ -1,25 +1,28 @@
-from aiogram import Bot, Dispatcher, types
-from config import db, bot
-
-
-from aiogram import Dispatcher, types
+from aiogram import types, Dispatcher
 from config import bot
 
-users = {}
-async def python(massage: types.Message):
-    user_name = massage.from_user.username
-    if user_name:
-        user_name = user_name
-    else:
-        user_name = massage.from_user.first_name
-    if massage.from_user.username is not users:
-        users[f'@{user_name}'] = massage.from_user.id
-        print(users                 )
+
+async def bad_word(message: types.Message):
+    if message.chat.type != 'private':
+        bad_words = ['чорт', 'гад', 'тупой']
+        username = f'{message.from_user.username}' \
+            if message.from_user.username is not None else message.from_user.full_name
+
+        for word in bad_words:
+            if word in message.text.lower().replace(' ', ''):
+                await bot.delete_message(message.chat.id, message.message_id)
+                await message.answer(f'Не матюкайся {username}')
+
+        if message.text == 'python':
+            text = f'У тебя получиться {message.from_user.full_name}'
+            await bot.send_message(message.chat.id, text)
+            await bot.send_dice(message.chat.id, emoji='🎰')
+
+        if message.text.startswith('.') and message.reply_to_message:
+            await bot.pin_chat_message(message.chat.id, message.message_id)
 
     else:
-        pass
+        await message.answer("Пиши в группе")
 
-
-def reg_hand_extra(db: Dispatcher):
-    db.register_message_handler(python)
-
+def register_handlers_extra(dp: Dispatcher):
+    dp.register_message_handler(bad_word)
